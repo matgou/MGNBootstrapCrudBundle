@@ -1,0 +1,40 @@
+{% if not persisted %}
+    <div class="modal-header">
+	    <a class="close" data-dismiss="modal">×</a>
+	    <h3>Modal header</h3>
+    </div>
+    <div class="modal-body">
+    <form method="post" {{ form_enctype(form) }} id="jkr_shoppinglist_{{ className }}_add_form_form">
+	    {{ form_widget(form) }}
+
+    </form>
+    </div>
+    <div class="modal-footer">
+	    <a href="#" class="btn" data-dismiss="modal">Close</a>
+	    <a href="#" class="btn btn-primary" id="jkr_shoppinglist_{{ className }}_save_btn">Save changes</a>
+    </div>
+
+    <script>
+function jkr_shoppinglist_{{ className }}_add_form_init() {
+	$('#jkr_shoppinglist_{{ className }}_save_btn').on('click', function () {
+		{% if not objectId %}
+		ajaxUpdateForm("{{ path('jkr_shoppinglist_' ~ className ~ '_add_form', {'type': 'ajax'}) }}", "{{ className }}Modal", "jkr_shoppinglist_{{ className }}_add_form_init", "jkr_shoppinglist_{{ className }}_add_form_form");
+		{% else %}
+                ajaxUpdateForm("{{ path('jkr_shoppinglist_' ~ className ~ '_edit_form', {'type': 'ajax', id: objectId}) }}", "{{ className }}Modal", "jkr_shoppinglist_{{ className }}_edit_form_init", "jkr_shoppinglist_{{ className }}_add_form_form");
+		{% endif %}
+		$('#{{ className }}Modal').modal('hide');
+                ajaxLoadElement("{{ path('jkr_shoppinglist_' ~ className ~ '_list', {'page': 0}) }}", "{{ className }}-list", "jkr_shoppinglist_{{ className }}_list_init");
+        });
+}
+    </script>
+{% else %}
+    <script>
+{% if not objectId %}
+function jkr_shoppinglist_{{ className }}_add_form_init() {
+{% else %}
+function jkr_shoppinglist_{{ className }}_edit_form_init() {
+{% endif %}
+        $('#{{ className }}Modal').modal('hide');
+}
+    </script>
+{% endif %}

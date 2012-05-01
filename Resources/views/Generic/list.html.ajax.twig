@@ -1,0 +1,110 @@
+    <div class="row-fluid">
+        <div class="span9">
+            <a class="btn btn-primary" data-toggle="modal" onclick="javascript:new{{ className|capitalize }}()">Add a {{ className }}</a>
+        </div>
+        <div class="span3">
+            <form class="form-search">
+                <input type="text" id="{{ className|capitalize }}SearchBox" class="input-medium search-query" value="{{ searchFilter }}">
+                <a onclick="javascript:search{{ className|capitalize }}()" class="btn">Search</a>
+            </form>
+        </div>
+    </div>
+
+    <form id="empty-form" {{ form_enctype(deleteForm) }}>
+        {{ form_widget(deleteForm) }}
+    </form>
+
+    <table class="table table-striped">
+    <thead>
+        <tr>
+            {% for attributeName, labelAttribute in labelAttributes %}
+		<th>
+                    {{ labelAttribute }}
+                    {% if sortableAttributes[attributeName] %}
+                        <a onclick="javascript:list{{ className|capitalize }}OrderByUp('{{ attributeName }}')"><i class="icon-chevron-up">&nbsp;</i></a>
+                        <a onclick="javascript:list{{ className|capitalize }}OrderByDown('{{ attributeName }}')"><i class="icon-chevron-down">&nbsp;</i></a>
+                    {% endif %}
+                </td>
+            {% endfor %}
+	    <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for object in objects %}
+        <tr>
+            {% for attributeName in attributes %}
+		{% set attributeValue = attribute(object,attributeName) %}
+		{% if attributeValue is iterable %}
+                    <td>{% for subValue in attributeValue %}<span class="label">{{ subValue }}</span>&nbsp;{% endfor %}</td>
+		{% else %}
+                    <td> {{ attributeValue }} </td>
+		{% endif %}
+            {% endfor %}
+            <td><a onclick="javascript:edit{{ className|capitalize }}({{ object.id }})"><i class="icon-pencil">&nbsp;</i></a><a onclick="javascript:drop{{ className|capitalize }}({{ object.id }})"><i class="icon-trash">&nbsp;</i></a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+
+    <div class="pagination" style="text-align:center">
+        <ul>
+            <li><a {% if page != 1 %}onclick="javascript:loadList{{ className|capitalize }}({{ page - 1 }})"{% endif %} href="#">Prev</a></li>
+            {% for i in range(1, maxPage) %}
+                <li onclick="javascript:loadList{{ className|capitalize }}({{ i }})" {% if page  == i %}class="active"{% endif %}><a href="#">{{ i }}</a></li>
+            {% endfor %}   
+            <li><a {% if page != maxPage %}onclick="javascript:loadList{{ className|capitalize }}({{ page + 1 }})"{% endif %} href="#">Next</a></li>
+        </ul>
+    </div>
+
+<script>
+function search{{ className|capitalize }}()
+{
+    val = $("#{{ className|capitalize }}SearchBox").val()
+    ajaxLoadElement("{{ path(listRoute, {'page': 1, 'direction':'up', 'attribute': 'id', 'search': 'XXXXXXXXXXX'}) }}".replace('XXXXXXXXXXX', val), "{{ className }}-list", "jkr_shoppinglist_{{ className }}_list_init");
+}
+
+function jkr_shoppinglist_{{ className }}_list_init()
+{
+
+}
+
+function new{{ className|capitalize }}()
+{
+    $('#{{ className }}Modal').modal('show');
+    ajaxLoadElement("{{ path(newRoute, {'type': 'ajax'}) }}", "{{ className }}Modal", "show_{{ className }}_modal");
+}
+
+function drop{{ className|capitalize }}({{ className }}Id)
+{
+    data = $('#empty-form').serialize();
+    ajaxActionMessages("{{ path(dropRoute, {'type': 'ajax', 'id': 9999}) }}".replace('9999', {{ className }}Id), data);
+    ajaxLoadElement("{{ path(listRoute, {'page': 1}) }}", "{{ className }}-list", "jkr_shoppinglist_{{ className }}_list_init");
+}
+
+function edit{{ className|capitalize }}({{ className }}Id)
+{
+    $('#{{ className }}Modal').modal('show');
+    ajaxLoadElement("{{ path(editRoute, {'type': 'ajax', 'id': 9999}) }}".replace('9999', {{ className }}Id), "{{ className }}Modal", "show_{{ className }}_modal");
+}
+
+function loadList{{ className|capitalize }}(page)
+{
+    ajaxLoadElement("{{ path(listRoute, {'page': 9999, 'direction': orderDirection, 'attribute': orderAttribute, 'search': searchFilter}) }}".replace('9999', page), "{{ className }}-list", "jkr_shoppinglist_{{ className }}_list_init");
+}
+
+function list{{ className|capitalize }}OrderByUp(attributeName)
+{
+    ajaxLoadElement("{{ path(listRoute, {'page': 1, 'direction': 'up', 'attribute': 'XXXXXXXXXXX', 'search': searchFilter}) }}".replace('XXXXXXXXXXX', attributeName), "{{ className }}-list", "jkr_shoppinglist_{{ className }}_list_init");
+}
+
+function list{{ className|capitalize }}OrderByDown(attributeName)
+{
+    ajaxLoadElement("{{ path(listRoute, {'page': 1, 'direction': 'down', 'attribute': 'XXXXXXXXXXX', 'search': searchFilter}) }}".replace('XXXXXXXXXXX', attributeName), "{{ className }}-list", "jkr_shoppinglist_{{ className }}_list_init");
+}
+
+function show_{{ className }}_modal()
+{
+    jkr_shoppinglist_{{ className }}_add_form_init();
+    $('#{{ className }}Modal').modal('show');
+}
+</script>
